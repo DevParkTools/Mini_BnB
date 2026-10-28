@@ -1578,6 +1578,37 @@ return;
 computeDanger(false);
 }
 }
+if(p.mount===3){
+let tx=-1,ty=-1;
+if(mode===1){if(boss&&boss.alive){tx=(boss.x/TS)|0;ty=(boss.y/TS)|0;}}
+else{
+let bd=1e9;
+for(let i=0;i<players.length;i++){
+const q=players[i];
+if(q===p||!q.alive||q.team===p.team)continue;
+const qd=Math.abs(q.x-p.x)+Math.abs(q.y-p.y);
+if(qd<bd){bd=qd;tx=(q.x/TS)|0;ty=(q.y/TS)|0;}
+}
+}
+if(tx>=0){
+const ddx=tx-cx,ddy=ty-cy;
+const o=[];
+if(Math.abs(ddx)>=Math.abs(ddy)){if(ddx!==0)o.push([ddx>0?1:-1,0]);if(ddy!==0)o.push([0,ddy>0?1:-1]);}
+else{if(ddy!==0)o.push([0,ddy>0?1:-1]);if(ddx!==0)o.push([ddx>0?1:-1,0]);}
+o.push([0,1],[1,0],[0,-1],[-1,0]);
+let pick=-1,safe=-1;
+for(let k=0;k<o.length;k++){
+const nx=cx+o[k][0],ny=cy+o[k][1];
+if(nx<0||ny<0||nx>=COLS||ny>=ROWS)continue;
+const ni=ny*COLS+nx;
+if(grid[ni]===1)continue;
+if(safe<0)safe=ni;
+if(danger[ni]>=90){pick=ni;break;}
+}
+ai.goal=pick>=0?pick:safe;
+return;
+}
+}
 runBfs(cx,cy,st,D.margin);
 let goal=-1;
 if(Math.random()<D.itemP){
@@ -1735,7 +1766,7 @@ if(b.dead||Math.abs(p.x-(b.x+0.5)*TS)>=HALF+TS/2||Math.abs(p.y-(b.y+0.5)*TS)>=HA
 }
 const ti=tileIdxOf(p.x,p.y);
 if(p.state===0&&p.inv<=0&&fire[ti]>0)trap(p,fireOwner[ti]);
-if(p.state===0&&itemG[ti]!==0)pickItem(p,ti);
+if(p.state===0&&itemG[ti]!==0&&p.mount!==3)pickItem(p,ti);
 if(p.human&&p.state===0&&coinG[ti]!==0)pickCoin(ti);
 }
 
